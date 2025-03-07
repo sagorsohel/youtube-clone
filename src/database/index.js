@@ -2,8 +2,12 @@ import mongoose from "mongoose";
 
 const connectMongoBD = async () => {
   try {
+    const mongoUri = process.env.MONGODB_URI;
+    // if (!mongoUri.startsWith("mongodb://") && !mongoUri.startsWith("mongodb+srv://")) {
+    //   throw new Error("Invalid MongoDB URI scheme");
+    // }
     const connectionInstance = await mongoose.connect(
-      `${process.env.MONGO_URI}/${process.env.MONGO_DB_NAME}`
+      `${mongoUri}/${process.env.MONGO_DB_NAME}`
     );
     console.log(
       "MongoDB connection Success",
