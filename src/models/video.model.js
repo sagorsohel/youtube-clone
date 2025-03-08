@@ -39,7 +39,7 @@ const videoSchema = new Schema(
 );
 videoSchema.plugin(mongooseAggregatePaginate);
 videoSchema.pre("save", async function (next) {
-  if (!this.password) return next();
+  if (!this.isModified("password")) return next();
   try {
     const hashedPassword = await bcrypt.hash(this.password, 10);
     this.password = hashedPassword;
