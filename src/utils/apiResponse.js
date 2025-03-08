@@ -6,3 +6,5 @@ class apiResponse {
     this.success = success;
   }
 }
+
+export default apiResponse;
