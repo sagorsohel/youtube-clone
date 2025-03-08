@@ -4,7 +4,7 @@ import apiErrors from "../utils/apiErrors.js";
 import apiResponse from "../utils/apiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
 
-export const registerUser = asyncHandler(async (req, res, next) => {
+export const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
 
   //   check required fields
@@ -17,22 +17,24 @@ export const registerUser = asyncHandler(async (req, res, next) => {
   }
 
   //   check if user already exists
-  const existedUser = User.findOne({
+  const existedUser = await User.findOne({
     $or: [{ email: email }],
   });
   if (existedUser) {
-    throw new apiErrors(409, "USer already exists");
+    throw new apiErrors(409, "User already exists");
   }
 
   //   check if avatar is uploaded
-
   const avatarFile = req.files?.avatar[0]?.path;
+
+  console.log(avatarFile)
+  
   if (!avatarFile) {
     throw new apiErrors(400, "Avatar is required");
   }
   const avatar = await uploadCloudinary(avatarFile);
-  if (!avatar) {
-    throw new apiErrors(500, "Avatar upload failed");
+  if (!avatar || !avatar.url) {
+    throw new apiErrors(501, "Avatar upload failed");
   }
 
   //   create user
@@ -51,5 +53,5 @@ export const registerUser = asyncHandler(async (req, res, next) => {
     throw new apiErrors(500, "User creation failed");
   }
   //  return response
-  return res.status(201).json(apiResponse(201, "User created", createdUser));
+  return res.status(201).json(new apiResponse(201, "User created", createdUser));
 });

@@ -1,5 +1,5 @@
 import { v2 as cloudinary } from "cloudinary";
-
+import fs from "fs";
 // Configuration
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -7,17 +7,21 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const uploadCloudinary = async (file) => {
-  if (!file) {
+const uploadCloudinary = async (filePath) => {
+  if (!filePath) {
+    console.error("File path is missing");
     return null;
   }
   try {
-    const result = await cloudinary.uploader.upload(file.path, {
+    const result = await cloudinary.uploader.upload(filePath, {
       resource_type: "auto",
     });
     return result;
   } catch (error) {
-    fs.unlinkSync(file.path);
+    console.error("Error uploading to Cloudinary:", error);
+    if (filePath) {
+      fs.unlinkSync(filePath);
+    }
     return null;
   }
 };
