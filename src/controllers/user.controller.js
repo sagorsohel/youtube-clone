@@ -21,4 +21,11 @@ export const registerUser = asyncHandler(async (req, res, next) => {
   if (existedUser) {
     throw new apiErrors(409, "USer already exists");
   }
+
+  //   check if avatar is uploaded
+
+  const avatarFile = req.files?.avatar[0]?.path;
+  if (!avatarFile) {
+    throw new apiErrors(400, "Avatar is required");
+  }
 });
