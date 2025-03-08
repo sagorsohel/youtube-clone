@@ -12,6 +12,27 @@ const userSchema = new mongoose.Schema(
       unique: true,
       index: true,
     },
+    password: {
+      type: String,
+      required: true,
+    },
+    refreshToken: {
+      type: String,
+    },
+
+    watchHistory: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Video",
+      },
+    ],
+    avatar: {
+      type: String,
+      required: true,
+    },
+    coverImage: {
+      type: String,
+    },
   },
   {
     timestamps: true,
