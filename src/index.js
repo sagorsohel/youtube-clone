@@ -6,6 +6,8 @@ dotenv.config({
   path: "/.env",
 });
 
+
+
 connectMongoBD()
   .then(() => {
     console.log("MongoDB connected");
