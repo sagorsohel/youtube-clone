@@ -48,5 +48,15 @@ videoSchema.pre("save", async function (next) {
     return next(error);
   }
 });
+
+videoSchema.methods.comparePassword = async function (candidatePassword, next) {
+  try {
+    const isMatch = await bcrypt.compare(candidatePassword, this.password);
+    return isMatch;
+  } catch (error) {
+    return next(error);
+  }
+};
+
 const Video = mongoose.model("Video", videoSchema);
 export default Video;
