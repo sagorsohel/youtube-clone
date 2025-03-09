@@ -25,10 +25,10 @@ const generateAccessTokenAndRefreshToken = async (userId) => {
 
 // register user
 export const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password ,userName} = req.body;
 
   //   check required fields
-  const missingFields = ["name", "email", "password"].filter(
+  const missingFields = ["name", "email", "password","userName"].filter(
     (field) => !req.body[field]
   );
 
@@ -40,7 +40,7 @@ export const registerUser = asyncHandler(async (req, res) => {
 
   //   check if user already existss
   const existedUser = await User.findOne({
-    $or: [{ email: email }],
+    $or: [{ email: email },{userName:userName}],
   });
   if (existedUser) {
     throw new apiErrors(409, "User already exists");
@@ -63,6 +63,7 @@ export const registerUser = asyncHandler(async (req, res) => {
     email,
     password,
     avatar: avatar.url,
+    userName
   });
   //   check if user is created
   const createdUser = await User.findById(user._id).select(
