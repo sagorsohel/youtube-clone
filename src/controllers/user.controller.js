@@ -5,7 +5,6 @@ import apiResponse from "../utils/apiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
 
 const generateAccessTokenAndRefreshToken = async (userId) => {
-  console.log(`Generating tokens for user: ${userId}`);
   try {
     const user = await User.findById(userId);
     if (!user) {
