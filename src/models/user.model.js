@@ -50,7 +50,7 @@ userSchema.pre("save", async function (next) {
     return next(error);
   }
 });
-userSchema.methods.comparePassword = async function (candidatePassword, next) {
+userSchema.methods.matchPassword = async function (candidatePassword, next) {
   try {
     const isMatch = await bcrypt.compare(candidatePassword, this.password);
     return isMatch;
@@ -73,7 +73,7 @@ userSchema.methods.generateRefreshToken = function () {
     { _id: this._id, email: this.email },
     process.env.REFRESH_TOKEN_SECRET,
     {
-      expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
+      expiresIn: process.env.REFRESH_TOKEN_EXPIRES,
     }
   );
   return refreshToken;
