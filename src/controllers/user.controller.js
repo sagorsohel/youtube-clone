@@ -133,7 +133,15 @@ export const logoutUser = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(req.user._id, {
     $set: { refreshToken: undefined },
   });
-  res.status(200).clearCookie("accessToken").clearCookie("refreshToken").json({
-    message: "Logged out",
-  });
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+  res
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json({
+      message: "Logged out",
+    });
 });
