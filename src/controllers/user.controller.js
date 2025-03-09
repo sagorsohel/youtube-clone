@@ -4,6 +4,7 @@ import apiErrors from "../utils/apiErrors.js";
 import apiResponse from "../utils/apiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
 
+// generate access token and refresh token
 const generateAccessTokenAndRefreshToken = async (userId) => {
   try {
     const user = await User.findById(userId);
@@ -22,6 +23,7 @@ const generateAccessTokenAndRefreshToken = async (userId) => {
   }
 };
 
+// register user
 export const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -76,6 +78,7 @@ export const registerUser = asyncHandler(async (req, res) => {
     .json(new apiResponse(201, "User created", createdUser));
 });
 
+// login user
 export const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
   // check required fields
@@ -128,7 +131,9 @@ export const loginUser = asyncHandler(async (req, res) => {
     );
 });
 
+// logout user
 export const logoutUser = asyncHandler(async (req, res) => {
+  // remove refresh token from user
   await User.findByIdAndUpdate(req.user._id, {
     $set: { refreshToken: undefined },
   });
