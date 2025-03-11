@@ -67,3 +67,6 @@ export const uploadVideo = asyncHandler(async (req, res) => {
     .status(200)
     .json(new apiResponse(200, "Video uploaded successfully", savedVideo));
 });
+
+
+export const deleteVideo= asyncHandler(async (req, res) => {})
