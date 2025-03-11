@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import User from "../models/user.model.js";
 import uploadCloudinary from "../services/clodinary.js";
 import apiErrors from "../utils/apiErrors.js";
@@ -25,10 +26,10 @@ const generateAccessTokenAndRefreshToken = async (userId) => {
 
 // register user
 export const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password ,userName} = req.body;
+  const { name, email, password, userName } = req.body;
 
   //   check required fields
-  const missingFields = ["name", "email", "password","userName"].filter(
+  const missingFields = ["name", "email", "password", "userName"].filter(
     (field) => !req.body[field]
   );
 
@@ -40,7 +41,7 @@ export const registerUser = asyncHandler(async (req, res) => {
 
   //   check if user already existss
   const existedUser = await User.findOne({
-    $or: [{ email: email },{userName:userName}],
+    $or: [{ email: email }, { userName: userName }],
   });
   if (existedUser) {
     throw new apiErrors(409, "User already exists");
@@ -63,7 +64,7 @@ export const registerUser = asyncHandler(async (req, res) => {
     email,
     password,
     avatar: avatar.url,
-    userName
+    userName,
   });
   //   check if user is created
   const createdUser = await User.findById(user._id).select(
@@ -149,4 +150,103 @@ export const logoutUser = asyncHandler(async (req, res) => {
     .json({
       message: "Logged out",
     });
+});
+
+// get user channel profile
+export const getUserChannel = asyncHandler(async (req, res) => {
+  const { username } = req.params.username;
+
+  if (!username?.trim()) {
+    res.status(400).json(new apiErrors(400, "Username is required"));
+  }
+  const channel = await User.aggregate([
+    {
+      $match: { userName: username },
+    },
+    {
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "channel",
+        as: "subscribers",
+      },
+    },
+    {
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "subscriber",
+        as: "subscriptions",
+      },
+    },
+    {
+      $addFields: {
+        subscriberCount: { $size: "$subscribers" },
+        subscriptionCount: { $size: "$subscriptions" },
+        isSubscribed: {
+          if: { $in: [req.user._id, "$subscribers"] },
+          then: true,
+          else: false,
+        },
+      },
+    },
+    {
+      $project: {
+        userName: 1,
+        isSubscribed: 1,
+        subscriptionCount: 1,
+        subscriberCount: 1,
+        avatar: 1,
+        email: 1,
+        name: 1,
+      },
+    },
+  ]);
+
+  if (!channel?.length) {
+    throw new apiErrors(404, "Channel not found");
+  }
+  res.status(200).json(new apiResponse(200, "Channel found", channel[0]));
+});
+
+export const watchHistory = asyncHandler(async (res, res) => {
+  const user = await user.aggregate([
+    {
+      $match: new mongoose.Types.ObjectId(req.user._id),
+    },
+    {
+      $lookup: {
+        from: "videos",
+        localField: "watchHistory",
+        foreignField: "_id",
+        pipeline: [
+          {
+            $lookup: {
+              from: "users",
+              localField: "owner",
+              foreignField: "_id",
+              as: "owner",
+              pipeline: [
+                {
+                  $project: {
+                    userName: 1,
+                    name: 1,
+                    avatar: 1,
+                    email: 1,
+                  },
+                },
+              ],
+            },
+          },
+          {
+            $addFields: {
+              owner: { $arrayElemAt: ["$owner", 0] },
+            },
+          },
+        ],
+      },
+    },
+  ]);
+
+ return res.status(200).json(new apiResponse(200, "Watch history", user[0].watchHistory));
 });
