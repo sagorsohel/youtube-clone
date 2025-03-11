@@ -68,7 +68,7 @@ userSchema.methods.matchPassword = async function (candidatePassword, next) {
 };
 userSchema.methods.generateAccessToken = function () {
   const accessToken = jwt.sign(
-    { _id: this._id, email: this.email },
+    { _id: this._id, email: this.email,userName:this.userName },
     process.env.ACCESS_TOKEN_SECRET,
     {
       expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
