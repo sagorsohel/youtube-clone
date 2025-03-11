@@ -6,6 +6,15 @@ import asyncHandler from "../utils/asyncHandler.js";
 
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
+
+// Helper function to extract public_id from Cloudinary URL
+const extractPublicId = (url) => {
+  if (!url) return null;
+  const parts = url.split("/");
+  const fileWithExt = parts.pop();
+  const publicId = fileWithExt.split(".")[0];
+  return publicId;
+};
 // Get videos
 export const getVideos = asyncHandler(async (req, res) => {
   const { skip, limit } = req.query;
@@ -125,4 +134,32 @@ export const updateVideo = asyncHandler(async (req, res) => {
     .json(new apiResponse(200, "Video updated successfully", updatedVideo));
 });
 
-export const deleteVideo = asyncHandler(async (req, res) => {});
+export const deleteVideo = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const video = await Video.findById(id);
+
+  if (!video) {
+    return res.status(404).json(new apiErrors(404, "Video not found"));
+  }
+
+  // Delete video from Cloudinary
+  if (video.videoFile) {
+    const videoPublicId = extractPublicId(video.videoFile);
+    await cloudinary.uploader
+      .destroy(videoPublicId, { resource_type: "video" })
+      .catch((err) => console.error(err));
+  }
+
+  // Delete thumbnail from Cloudinary
+  if (video.thumbFile) {
+    const thumbPublicId = extractPublicId(video.thumbFile);
+    await cloudinary.uploader
+      .destroy(thumbPublicId)
+      .catch((err) => console.error(err));
+  }
+
+  // Delete video from the database
+  await Video.findByIdAndDelete(id);
+
+  res.status(200).json(new apiResponse(200, "Video deleted successfully"));
+});

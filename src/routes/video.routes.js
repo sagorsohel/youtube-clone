@@ -2,6 +2,7 @@ import { Router } from "express";
 import verifyJWT from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import {
+  deleteVideo,
   getVideos,
   updateVideo,
   uploadVideo,
@@ -30,5 +31,6 @@ videoRouter.route("/update-video/:id").patch(
   ]),
   updateVideo
 );
+videoRouter.route("/delete-video/:id").delete(verifyJWT, deleteVideo);
 
 export default videoRouter;
