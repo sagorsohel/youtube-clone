@@ -9,9 +9,15 @@ export const getVideos = asyncHandler(async (req, res) => {
   const numberSkip = parseInt(skip) || 0;
   const numberLimit = parseInt(limit) || 10;
   const videos = await Video.find().skip(numberSkip).limit(numberLimit);
+
+  const totalVideos = await Video.countDocuments();
+  const data = {
+    videos,
+    totalVideos,
+  };
   res
     .status(200)
-    .json(new apiResponse(200, "Videos fetched successfully", videos));
+    .json(new apiResponse(200, "Videos fetched successfully", data));
 });
 
 // Upload video
