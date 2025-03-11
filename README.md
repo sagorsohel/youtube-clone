@@ -1,35 +1,22 @@
-<h1 align="center">Welcome to youtube-clone 👋</h1>
-<p>
-  <a href="https://www.npmjs.com/package/youtube-clone" target="_blank">
-    <img alt="Version" src="https://img.shields.io/npm/v/youtube-clone.svg">
-  </a>
-  <a href="#" target="_blank">
-    <img alt="License: ISC" src="https://img.shields.io/badge/License-ISC-yellow.svg" />
-  </a>
-</p>
+# YouTube Clone 👋
 
-> backend project for showcase
+![Version Badge](https://img.shields.io/npm/v/youtube-clone.svg)  
+![License Badge](https://img.shields.io/badge/License-ISC-yellow.svg)
 
-## Install
+A backend project to showcase video management functionalities similar to YouTube. This project includes user authentication, video uploads, and CRUD operations for managing video content.
 
-```sh
-npm install
-```
+## Features
 
-## Usage
+- **User Registration & Login**: Secure user authentication using JWT.
+- **Video Management**: Users can upload, update, and delete their videos.
+- **Cloud Integration**: Videos and thumbnails are uploaded to **Cloudinary** for storage.
+- **Database**: MongoDB is used to manage video data and user information.
+  
+## Installation
 
-```sh
-npm run start
-```
+To get started with the project, follow these steps:
 
-## Author
+1. Clone the repository:
 
-👤 **sohel hossain**
-
-
-## Show your support
-
-Give a ⭐️ if this project helped you!
-
-***
-_This README was generated with ❤️ by [readme-md-generator](https://github.com/kefranabg/readme-md-generator)_
+   ```sh
+   git clone https://github.com/sagorsohel/youtube-clone.git
