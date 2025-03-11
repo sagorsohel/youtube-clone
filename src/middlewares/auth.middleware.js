@@ -27,6 +27,7 @@ const verifyJWT = asyncHandler(async (req, res, next) => {
     }
 
     next();
+    return req.user;
   } catch (error) {
     return res.status(401).json({ message: "Unauthorized" });
   }

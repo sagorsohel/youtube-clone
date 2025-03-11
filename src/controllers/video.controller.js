@@ -4,15 +4,23 @@ import apiErrors from "../utils/apiErrors.js";
 import apiResponse from "../utils/apiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
 
-
+export const getVideos = asyncHandler(async (req, res) => {
+  const { skip, limit } = req.query;
+  const numberSkip = parseInt(skip) || 0;
+  const numberLimit = parseInt(limit) || 10;
+  const videos = await Video.find().skip(numberSkip).limit(numberLimit);
+  res
+    .status(200)
+    .json(new apiResponse(200, "Videos fetched successfully", videos));
+});
 
 // Upload video
 export const uploadVideo = asyncHandler(async (req, res) => {
   const { title, description } = req.body;
   const videoFile = req.files.videoFile[0];
   const thumbFile = req.files.thumbFile[0];
-  const { user } = req.user;
 
+  const { user } = req;
 
   //   check data from the request
 
@@ -42,7 +50,7 @@ export const uploadVideo = asyncHandler(async (req, res) => {
     thumbFile: thumb?.url,
     title,
     description,
-    owner: user,
+    owner: user?._id,
     duration: video?.duration,
   });
 
