@@ -16,7 +16,7 @@ router
 
 router.route("/login").post(loginUser);
 router.route("/logout").post(verifyJWT, logoutUser);
-router.route("/get-user-channel/:userName").get(verifyJWT, getUserChannel);
+router.route("/get-user-channel/:username").get(verifyJWT, getUserChannel);
 router.route("/watch-history").get(verifyJWT, watchHistory);
 
 

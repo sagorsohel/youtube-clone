@@ -154,60 +154,68 @@ export const logoutUser = asyncHandler(async (req, res) => {
 });
 
 // get user channel profile
-export const getUserChannel = asyncHandler(async (req, res) => {
-  const { username } = req.params.username;
+export const getUserChannel = asyncHandler(async (req, res, next) => {
+  try {
+    const { username } = req.params;
 
-  if (!username?.trim()) {
-    res.status(400).json(new apiErrors(400, "Username is required"));
-  }
-  const channel = await User.aggregate([
-    {
-      $match: { userName: username },
-    },
-    {
-      $lookup: {
-        from: "subscriptions",
-        localField: "_id",
-        foreignField: "channel",
-        as: "subscribers",
+    if (!username?.trim()) {
+      return res.status(400).json(new apiErrors(400, "Username is required"));
+    }
+
+    const channel = await User.aggregate([
+      {
+        $match: { userName: username },
       },
-    },
-    {
-      $lookup: {
-        from: "subscriptions",
-        localField: "_id",
-        foreignField: "subscriber",
-        as: "subscriptions",
-      },
-    },
-    {
-      $addFields: {
-        subscriberCount: { $size: "$subscribers" },
-        subscriptionCount: { $size: "$subscriptions" },
-        isSubscribed: {
-          if: { $in: [req.user._id, "$subscribers"] },
-          then: true,
-          else: false,
+      {
+        $lookup: {
+          from: "subscriptions",
+          localField: "_id",
+          foreignField: "channel",
+          as: "subscribers",
         },
       },
-    },
-    {
-      $project: {
-        userName: 1,
-        isSubscribed: 1,
-        subscriptionCount: 1,
-        subscriberCount: 1,
-        avatar: 1,
-        email: 1,
-        name: 1,
+      {
+        $lookup: {
+          from: "subscriptions",
+          localField: "_id",
+          foreignField: "subscriber",
+          as: "subscriptions",
+        },
       },
-    },
-  ]);
+      {
+        $addFields: {
+          subscriberCount: { $size: "$subscribers" },
+          subscriptionCount: { $size: "$subscriptions" },
+          isSubscribed: {
+            $cond: {
+              if: { $in: [req.user._id, "$subscribers"] },
+              then: true,
+              else: false,
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          userName: 1,
+          isSubscribed: 1,
+          subscriptionCount: 1,
+          subscriberCount: 1,
+          avatar: 1,
+          email: 1,
+          name: 1,
+        },
+      },
+    ]);
 
-  if (!channel?.length) {
-    throw new apiErrors(404, "Channel not found");
+    if (!channel.length) {
+      return res.status(404).json(new apiErrors(404, "Channel not found"));
+    }
+
+    return res.status(200).json(new apiResponse(200, "Channel found", channel[0]));
+  } catch (error) {
+    next(error);
   }
-  res.status(200).json(new apiResponse(200, "Channel found", channel[0]));
 });
 
 export const watchHistory = asyncHandler(async (req, res) => {
