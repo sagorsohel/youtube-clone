@@ -4,6 +4,8 @@ import apiErrors from "../utils/apiErrors.js";
 import apiResponse from "../utils/apiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
 
+import { v2 as cloudinary } from "cloudinary";
+import fs from "fs";
 // Get videos
 export const getVideos = asyncHandler(async (req, res) => {
   const { skip, limit } = req.query;
@@ -68,5 +70,59 @@ export const uploadVideo = asyncHandler(async (req, res) => {
     .json(new apiResponse(200, "Video uploaded successfully", savedVideo));
 });
 
+export const updateVideo = asyncHandler(async (req, res) => {
+  const { title, description } = req.body;
+  const { id } = req.params;
+  const video = await Video.findById(id);
+  const videoFile = req.files?.videoFile?.[0];
+  const thumbFile = req.files?.thumbFile?.[0];
 
-export const deleteVideo= asyncHandler(async (req, res) => {})
+  if (!video) {
+    return res.status(404).json(new apiErrors(404, "Video not found"));
+  }
+
+  let videoData, thumbData;
+
+  // Upload new video if provided
+  if (videoFile) {
+    videoData = await uploadCloudinary(videoFile.path);
+
+    // Delete old video from Cloudinary
+    if (video.videoFile) {
+      const oldVideoPublicId = extractPublicId(video.videoFile);
+      await cloudinary.uploader.destroy(oldVideoPublicId, {
+        resource_type: "video",
+      });
+    }
+  }
+
+  // Upload new thumbnail if provided
+  if (thumbFile) {
+    thumbData = await uploadCloudinary(thumbFile.path);
+    fs.unlinkSync(thumbFile.path); // Remove file after uploading
+
+    // Delete old thumbnail from Cloudinary
+    if (video.thumbFile) {
+      const oldThumbPublicId = extractPublicId(video.thumbFile);
+      await cloudinary.uploader.destroy(oldThumbPublicId);
+    }
+  }
+
+  // Update the video in the database
+  const updatedVideo = await Video.findByIdAndUpdate(
+    id,
+    {
+      title,
+      description,
+      videoFile: videoData?.url || video.videoFile, // Keep old if no new upload
+      thumbFile: thumbData?.url || video.thumbFile, // Keep old if no new upload
+    },
+    { new: true }
+  );
+
+  res
+    .status(200)
+    .json(new apiResponse(200, "Video updated successfully", updatedVideo));
+});
+
+export const deleteVideo = asyncHandler(async (req, res) => {});
