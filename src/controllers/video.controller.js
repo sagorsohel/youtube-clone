@@ -13,7 +13,7 @@ export const uploadVideo = asyncHandler(async (req, res) => {
   const thumbFile = req.files.thumbFile[0];
   const { user } = req.user;
 
-  console.log(videoFile);
+
   //   check data from the request
 
   if (!title) {
