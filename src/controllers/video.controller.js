@@ -4,6 +4,7 @@ import apiErrors from "../utils/apiErrors.js";
 import apiResponse from "../utils/apiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
 
+// Get videos
 export const getVideos = asyncHandler(async (req, res) => {
   const { skip, limit } = req.query;
   const numberSkip = parseInt(skip) || 0;
